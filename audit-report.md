@@ -636,7 +636,139 @@ Additionally, heavy reliance on third-party scripts and exposure of identifiers 
 
 ![Third Party Storage](./images/third-party-storage.png)
 ## 5. Storage & Session Management
+### Overview
 
+The application makes extensive use of browser storage mechanisms including cookies, localStorage, and third-party storage contexts. While these are commonly used for analytics and session tracking, the current implementation introduces potential security and privacy concerns due to exposure of identifiers and heavy reliance on third-party storage.
+
+---
+
+### Key Findings
+
+#### 1. Extensive Use of Third-Party Cookies
+
+**Evidence:**
+- 70+ third-party cookies detected
+- Sources include:
+  - Google (Analytics, reCAPTCHA, DoubleClick)
+  - LinkedIn Ads
+  - HubSpot
+  - Clarity
+  - Lijit / ad networks
+
+**Impact:**
+- Increased tracking across multiple domains
+- Potential privacy compliance concerns (GDPR, etc.)
+- Dependency on third-party data handling policies
+
+**Recommendation:**
+- Minimize third-party cookies where possible
+- Implement consent-based cookie loading
+- Classify cookies (essential vs non-essential)
+
+---
+
+#### 2. Storage of Identifiers in LocalStorage
+
+**Evidence:**
+- LocalStorage contains:
+  - `mv_user_id`
+  - tracking IDs (e.g., `_li_duid`, `_gcl_ls`)
+  - analytics-related metadata
+
+**Impact:**
+- Sensitive identifiers accessible via JavaScript
+- Vulnerable to XSS attacks
+- No built-in expiration or protection
+
+**Recommendation:**
+- Avoid storing sensitive identifiers in localStorage
+- Use secure, HttpOnly cookies for session management
+- Implement expiration and rotation strategies
+
+---
+
+#### 3. Lack of Secure Session Handling Indicators
+
+**Evidence:**
+- No clear session token handling observed in cookies
+- No visible use of HttpOnly session cookies for authentication
+
+**Impact:**
+- Potential risk if session management is handled client-side
+- Increased exposure to token theft via XSS
+
+**Recommendation:**
+- Use HttpOnly, Secure, SameSite cookies for sessions
+- Avoid storing authentication tokens in localStorage
+
+---
+
+#### 4. Multiple Third-Party Storage Contexts
+
+**Evidence:**
+- Storage access observed from:
+  - lijit.com
+  - liadm.com
+  - youtube.com
+
+- Marked as:
+  - “Is third-party: Yes”
+
+**Impact:**
+- Cross-site tracking capabilities
+- Data shared across multiple origins
+- Increased privacy and compliance risks
+
+**Recommendation:**
+- Limit third-party embeds and trackers
+- Use sandboxed iframes where applicable
+- Implement user consent mechanisms
+
+---
+
+#### 5. Cookie Security Attributes (Partial Implementation)
+
+**Evidence:**
+- Some cookies include:
+  - Secure flag
+  - SameSite attributes
+
+- However:
+  - Not all cookies consistently configured
+  - Heavy reliance on third-party cookie policies
+
+**Impact:**
+- Inconsistent security enforcement
+- Potential exposure depending on third-party configurations
+
+**Recommendation:**
+- Enforce:
+  - Secure
+  - HttpOnly
+  - SameSite=Strict (or Lax where needed)
+- Audit all cookies systematically
+
+---
+
+### Summary
+
+The application relies heavily on browser-based storage for tracking and analytics. While functional, this introduces increased exposure of identifiers and reliance on third-party storage systems.
+
+The most significant concerns include:
+- Exposure of identifiers in localStorage
+- Extensive third-party cookie usage
+- Cross-origin storage behavior
+
+Improving storage practices and enforcing stricter session management controls would significantly enhance both security and privacy compliance.
+
+---
+
+### Severity Breakdown
+
+- 🔴 High: LocalStorage exposure of identifiers  
+- 🟠 High: Third-party cookies and tracking  
+- 🟡 Medium: Session handling visibility  
+- 🟢 Low: Partial cookie security attributes present  
 ## 6. Cookie & Tracking Analysis
 
 ## 7. Third-Party Dependency Analysis
