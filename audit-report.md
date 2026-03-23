@@ -248,7 +248,154 @@ Addressing these issues will significantly improve stability, maintainability, a
 
 ![DevTools Issues](./images/devtools-issues.png)
 ## 3. API & Network Analysis
+### Overview
 
+The network and API analysis reveals multiple reliability and configuration issues, particularly related to failed requests, third-party dependencies, and inefficient request handling. While core requests function correctly, several external services fail or introduce latency.
+
+---
+
+### Key Findings
+
+#### 1. CORS Misconfiguration (Critical)
+
+**Evidence:**
+- Failed requests to:
+  https://e1.zinclabs.dev/v1/track
+- Error:
+  "No 'Access-Control-Allow-Origin' header is present"
+- Multiple failed `track` requests observed in Network tab :contentReference[oaicite:0]{index=0}
+
+**Impact:**
+- Analytics/tracking requests are completely broken
+- Data loss in tracking pipelines
+- Console errors affecting debugging and reliability
+
+**Recommendation:**
+- Configure backend to include:
+  Access-Control-Allow-Origin: *
+  (or restrict to specific domain)
+- Ensure proper handling of preflight (OPTIONS) requests
+
+---
+
+#### 2. Failed External API Calls
+
+**Evidence:**
+- Request to:
+  https://pro.ip-api.com/... → FAILED (timeout ~21s)
+- Status:
+  net::ERR_CONNECTION_TIMED_OUT
+
+**Impact:**
+- Long blocking requests (~21s) degrade performance
+- Potential UI delays or hanging states
+- Dependency on unreliable external service
+
+**Recommendation:**
+- Add timeout handling on frontend
+- Replace or remove unreliable IP lookup service
+- Use fallback or cached responses
+
+---
+
+#### 3. High Number of Third-Party Requests
+
+**Evidence:**
+- Requests to:
+  - Google Tag Manager
+  - Google Analytics
+  - Clarity
+  - LinkedIn Ads
+  - HubSpot
+  - reCAPTCHA
+- Numerous `collect`, `track`, `event` calls
+
+**Impact:**
+- Increased latency due to multiple external calls
+- Dependency on third-party uptime
+- Increased attack surface
+
+**Recommendation:**
+- Reduce redundant analytics calls
+- Consolidate tracking providers
+- Lazy-load non-critical scripts
+
+---
+
+#### 4. Repeated Tracking Requests
+
+**Evidence:**
+- Multiple `collect`, `event`, `track` calls
+- Frequent duplicate analytics requests
+
+**Impact:**
+- Unnecessary network load
+- Increased client-side processing
+- Potential inflated analytics data
+
+**Recommendation:**
+- Debounce or batch tracking events
+- Audit tracking logic for duplication
+
+---
+
+#### 5. Slow Requests (>500ms)
+
+**Evidence:**
+- Several requests in range:
+  - 700ms – 1000ms
+- Examples:
+  - attribution_trigger (~775ms)
+  - checkhtml.php (~875ms)
+
+**Impact:**
+- Slower page interactivity
+- Increased Time to Interactive (TTI)
+
+**Recommendation:**
+- Optimize backend response times
+- Use caching (CDN / server-side)
+- Reduce payload sizes
+
+---
+
+#### 6. Endpoint Exposure Testing
+
+**Tested Endpoints:**
+- /api/user  
+- /api/search  
+- /api/upload  
+- /admin  
+- /dashboard  
+- /login  
+
+**Result:**
+- All endpoints returned 404 (Not Found)
+
+**Insight:**
+- No obvious public API exposure detected
+- Indicates basic endpoint protection or frontend-only routing
+
+**Recommendation:**
+- Continue using proper API authentication and routing controls
+- Ensure sensitive endpoints are protected via authentication middleware
+
+---
+
+### Summary
+
+The application’s network layer is functional but heavily reliant on third-party services, several of which are misconfigured or failing. The most critical issue is the CORS misconfiguration causing failed API requests, along with slow and unreliable external dependencies.
+
+Improving API reliability, reducing third-party dependency, and optimizing request handling would significantly enhance system stability and performance.
+### Supporting Evidence
+
+![Network Overview](./images/network-overview.png)
+
+![Failed Requests](./images/failed-requests.png)
+
+![CORS Errors](./images/cors-errors.png)
+
+![Slow Requests](./images/slow-requests.png)
 ## 4. Security Analysis
 
 ## 5. Storage & Session Management
