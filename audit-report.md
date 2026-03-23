@@ -768,7 +768,14 @@ Improving storage practices and enforcing stricter session management controls w
 - 🔴 High: LocalStorage exposure of identifiers  
 - 🟠 High: Third-party cookies and tracking  
 - 🟡 Medium: Session handling visibility  
-- 🟢 Low: Partial cookie security attributes present  
+- 🟢 Low: Partial cookie security attributes present
+### Supporting Evidence
+
+![Cookies Overview](./images/cookies-overview.png)
+
+![Local Storage Data](./images/local-storage.png)
+
+![Third-Party Storage Context](./images/third-party-storage.png)
 ## 6. Cookie & Tracking Analysis
 
 ## 7. Third-Party Dependency Analysis
