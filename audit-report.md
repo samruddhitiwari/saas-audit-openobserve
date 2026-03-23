@@ -398,6 +398,243 @@ Improving API reliability, reducing third-party dependency, and optimizing reque
 ![Slow Requests](./images/slow-requests.png)
 ## 4. Security Analysis
 
+---
+
+## 4. Security Analysis
+
+### Overview
+
+The application demonstrates a generally secure infrastructure with HTTPS enforcement and modern transport security. However, several critical security headers and client-side storage practices introduce potential vulnerabilities, particularly around script injection risks, excessive third-party exposure, and tracking surface.
+
+---
+
+### Key Findings
+
+#### 1. Missing Content Security Policy (Critical)
+
+**Evidence:**
+- Content-Security-Policy header is not present
+- Reported in security header analysis (Grade: B)
+
+**Impact:**
+- Increased risk of Cross-Site Scripting (XSS)
+- Malicious scripts can be injected and executed
+- No restriction on external script sources
+
+**Recommendation:**
+
+
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self' https://trusted-cdn.com;
+  object-src 'none';
+#### 2\. Missing Permissions Policy
+
+**Evidence:**
+
+*   Permissions-Policy header not defined
+    
+
+**Impact:**
+
+*   Browser APIs (camera, mic, geolocation) are not explicitly restricted
+    
+*   Potential misuse by third-party scripts
+    
+
+**Recommendation:**
+
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   Permissions-Policy:  camera=(), microphone=(), geolocation=()   `
+
+#### 3\. Excessive Third-Party Script & Tracking Exposure
+
+**Evidence:**
+
+*   Third-party domains:
+    
+    *   Google (analytics, recaptcha)
+        
+    *   LinkedIn Ads
+        
+    *   HubSpot
+        
+    *   Clarity
+        
+    *   YouTube
+        
+    *   Lijit / ad networks
+        
+
+**Impact:**
+
+*   Increased attack surface
+    
+*   Potential data leakage to third parties
+    
+*   Dependency on external security posture
+    
+
+**Recommendation:**
+
+*   Audit and remove non-essential trackers
+    
+*   Use a tag manager strategy or server-side tracking
+    
+*   Limit third-party scripts in production
+    
+
+#### 4\. Client-Side Storage of Identifiers
+
+**Evidence:**
+
+*   LocalStorage contains:
+    
+    *   user identifiers (e.g., mv\_user\_id)
+        
+    *   tracking/session data
+        
+    *   analytics metadata
+        
+
+**Impact:**
+
+*   Sensitive identifiers exposed to browser environment
+    
+*   Vulnerable to XSS-based data extraction
+    
+*   No encryption or protection layer
+    
+
+**Recommendation:**
+
+*   Avoid storing sensitive identifiers in localStorage
+    
+*   Use HttpOnly cookies for session data
+    
+*   Encrypt or minimize stored data
+    
+
+#### 5\. Third-Party Storage Contexts
+
+**Evidence:**
+
+*   Multiple third-party storage contexts:
+    
+    *   lijit.com
+        
+    *   youtube.com
+        
+    *   liadm.com
+        
+
+**Impact:**
+
+*   Cross-site tracking risks
+    
+*   Data sharing across origins
+    
+*   Privacy and compliance concerns
+    
+
+**Recommendation:**
+
+*   Reduce third-party embeds where possible
+    
+*   Implement consent-based loading (GDPR-style)
+    
+*   Sandbox third-party iframes
+    
+
+#### 6\. Server Information Exposure
+
+**Evidence:**
+
+*   Server header reveals:
+    
+    *   AmazonS3
+        
+    *   CloudFront
+        
+
+**Impact:**
+
+*   Infrastructure fingerprinting
+    
+*   Helps attackers identify attack vectors
+    
+
+**Recommendation:**
+
+*   Remove or obfuscate Server header
+    
+
+#### 7\. Security Headers – Good Implementations
+
+**Present:**
+
+*   X-Frame-Options (clickjacking protection)
+    
+*   X-Content-Type-Options (MIME sniffing protection)
+    
+*   Strict-Transport-Security (HTTPS enforcement)
+    
+*   Referrer-Policy (data leakage control)
+    
+
+**Insight:**
+
+*   Strong baseline security posture already exists
+    
+*   Missing headers prevent achieving higher security grade (A)
+    
+
+#### 8\. HTTPS & Transport Security (Strong)
+
+**Evidence:**
+
+*   Valid TLS certificate (Amazon-issued)
+    
+*   Secure connection using modern encryption
+    
+*   All resources served over HTTPS
+    
+
+**Impact:**
+
+*   Data-in-transit is secure
+    
+*   No mixed content issues detected
+    
+
+### Summary
+
+The application has a solid foundational security setup, particularly in transport security and basic headers. However, the absence of a Content Security Policy and Permissions Policy introduces significant client-side risks.
+
+Additionally, heavy reliance on third-party scripts and exposure of identifiers in localStorage increases the attack surface. Addressing these issues would significantly strengthen the overall security posture and reduce risk of client-side exploitation.
+
+### Severity Breakdown
+
+*   🔴 Critical: Missing CSP
+    
+*   🟠 High: Third-party exposure, localStorage risks
+    
+*   🟡 Medium: Missing Permissions Policy, server header leakage
+    
+*   🟢 Low: Overall HTTPS and base headers well configured
+
+### Supporting Evidence
+
+![Security Headers Report](./images/security-headers.png)
+
+![Missing Headers](./images/missing-headers.png)
+
+![Raw Headers](./images/raw-headers.png)
+
+![HTTPS Security](./images/https-security.png)
+
+![Local Storage Data](./images/local-storage.png)
+
+![Third Party Storage](./images/third-party-storage.png)
 ## 5. Storage & Session Management
 
 ## 6. Cookie & Tracking Analysis
