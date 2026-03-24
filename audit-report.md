@@ -777,7 +777,256 @@ Improving storage practices and enforcing stricter session management controls w
 
 ![Third-Party Storage Context](./images/third-party-storage.png)
 ## 6. Cookie & Tracking Analysis
+## 6. Cookie & Tracking Analysis
 
+### Overview
+
+The application relies heavily on cookies and tracking technologies, with a significant presence of third-party trackers. While these tools support analytics and marketing, the current implementation introduces privacy, performance, and compliance risks.
+
+---
+
+### Key Findings
+
+#### 1. High Volume of Third-Party Cookies
+
+**Evidence:**
+- 70+ third-party cookies detected
+- Sources include:
+  - Google (Analytics, reCAPTCHA, DoubleClick)
+  - LinkedIn Ads
+  - HubSpot
+  - Clarity
+  - Lijit ad network
+
+**Impact:**
+- Cross-site user tracking across multiple platforms
+- Increased exposure to third-party data collection
+- Potential GDPR / privacy compliance risks
+
+**Recommendation:**
+- Categorize cookies (essential vs non-essential)
+- Implement cookie consent banner with granular control
+- Block non-essential cookies until user consent
+
+---
+
+#### 2. Cross-Domain Tracking Behavior
+
+**Evidence:**
+- Cookies set across multiple domains:
+  - google.com
+  - linkedin.com
+  - hubspot.com
+  - lijit.com
+
+**Impact:**
+- Enables cross-site tracking and profiling
+- Reduces user privacy
+- Expands attack surface
+
+**Recommendation:**
+- Minimize cross-domain tracking dependencies
+- Use first-party analytics where possible
+- Implement server-side tracking
+
+---
+
+#### 3. Heavy Reliance on Advertising & Tracking Pixels
+
+**Evidence:**
+- Presence of:
+  - LinkedIn tracking (`px.ads.linkedin.com`)
+  - Google Ads / DoubleClick
+  - HubSpot tracking scripts
+  - Clarity tracking
+
+**Impact:**
+- Increased page load overhead
+- Potential performance degradation
+- Data sharing with multiple vendors
+
+**Recommendation:**
+- Audit necessity of each tracking tool
+- Remove redundant or unused trackers
+- Consolidate tracking providers
+
+---
+
+### Summary
+
+The application uses a large number of third-party tracking mechanisms, which increases privacy risks and dependency on external services. While common in modern SaaS platforms, optimization and stricter control are recommended to balance analytics needs with performance and compliance.
+## 7. Third-Party Dependency Analysis
 ## 7. Third-Party Dependency Analysis
 
+### Overview
+
+The application depends significantly on third-party scripts and external services. While these enhance functionality (analytics, security, embeds), they also introduce performance overhead, reliability risks, and security considerations.
+
+---
+
+### Key Findings
+
+#### 1. Large Third-Party Script Sizes
+
+**Evidence (Treemap Analysis):**
+- Google reCAPTCHA: ~362 KB (largest single resource)
+- Google Tag Manager: ~146–170 KB
+- Additional analytics and tracking scripts present
+
+**Impact:**
+- Increased initial load time
+- Higher bandwidth usage
+- Slower performance on low-end devices
+
+**Recommendation:**
+- Lazy-load non-critical scripts
+- Replace heavy dependencies with lighter alternatives
+- Load scripts conditionally based on user interaction
+
+---
+
+#### 2. High Number of External Dependencies
+
+**Evidence:**
+- Scripts loaded from:
+  - gstatic.com (reCAPTCHA)
+  - googletagmanager.com
+  - cdnjs.cloudflare.com
+  - hubspot domains
+  - clarity.ms
+  - lijit / ad networks
+
+**Impact:**
+- Increased attack surface
+- Dependency on external uptime and security
+- Harder debugging and monitoring
+
+**Recommendation:**
+- Reduce dependency count
+- Self-host critical libraries where possible
+- Monitor third-party performance and failures
+
+---
+
+#### 3. Third-Party Failures Affecting Reliability
+
+**Evidence:**
+- Failed API calls:
+  - tracking endpoints (CORS errors)
+  - IP API timeout (~21s delay)
+
+**Impact:**
+- Broken functionality (tracking failures)
+- Increased page load time
+- Poor user experience
+
+**Recommendation:**
+- Implement fallback mechanisms
+- Add request timeouts
+- Remove unreliable third-party services
+
+---
+
+#### 4. Redundant or Duplicate Script Loading
+
+**Evidence:**
+- Multiple analytics and tracking scripts loaded simultaneously
+- Duplicate calls observed in network requests
+
+**Impact:**
+- Unnecessary network usage
+- Increased execution time
+- Potential data duplication
+
+**Recommendation:**
+- Deduplicate tracking scripts
+- Centralize tracking via a single manager (e.g., GTM optimization)
+
+---
+
+### Summary
+
+The application relies heavily on third-party services, many of which contribute significantly to page weight and introduce reliability risks. Optimizing dependency usage would improve performance, reduce failures, and enhance overall system stability.
 ## Final Summary & Recommendations
+## 8. Final Summary & Recommendations
+
+### Overall Assessment
+
+The application demonstrates a strong foundational setup with secure HTTPS implementation, functional APIs, and modern frontend architecture. However, several critical and high-impact issues were identified across performance, security, and dependency management.
+
+The most significant concerns include:
+- Missing Content Security Policy (CSP)
+- Heavy reliance on third-party scripts and tracking systems
+- Exposure of identifiers in client-side storage
+- Network reliability issues due to failing external services
+
+---
+
+### Key Risk Areas
+
+- 🔴 **Security Risks**
+  - Missing CSP exposes application to XSS attacks
+  - LocalStorage usage increases risk of data extraction
+  - Lack of strict browser policies
+
+- 🟠 **Performance Risks**
+  - Large third-party scripts (reCAPTCHA, GTM)
+  - Multiple redundant network requests
+  - Slow and failing external APIs
+
+- 🟠 **Privacy & Compliance Risks**
+  - Extensive third-party cookie usage
+  - Cross-domain tracking behavior
+  - Lack of user consent mechanisms
+
+---
+
+### Priority Recommendations
+
+#### Immediate (High Priority)
+
+- Implement Content Security Policy (CSP)
+- Fix CORS issues in tracking APIs
+- Remove or replace failing external APIs
+- Audit and reduce third-party scripts
+
+---
+
+#### Short-Term Improvements
+
+- Optimize script loading (lazy load, defer)
+- Reduce analytics redundancy
+- Implement cookie consent management
+- Move sensitive data out of localStorage
+
+---
+
+#### Long-Term Improvements
+
+- Shift to first-party or server-side analytics
+- Implement stricter browser security headers
+- Continuously monitor third-party dependencies
+- Establish performance and security monitoring pipelines
+
+---
+
+### Final Verdict
+
+The application is functional and relatively well-structured, but optimization in security, performance, and dependency management is required to reach production-grade robustness.
+
+Addressing the highlighted issues would:
+- Improve load performance
+- Reduce security vulnerabilities
+- Enhance user privacy and compliance
+- Increase overall system reliability
+
+---
+
+### Audit Score (Estimated)
+
+- Performance: 91/100  
+- Accessibility: 91/100  
+- Best Practices: 54/100  
+- SEO: 100/100  
+
+**Overall:** ⚠️ Good foundation, needs optimization for production-grade quality
